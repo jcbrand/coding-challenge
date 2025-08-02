@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { Edge } from './edge.entity';
 import { EdgesModule } from './edges/edges.module';
+import { RabbitMQModule } from './rabbitmq/rabbitmq.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { EdgesModule } from './edges/edges.module';
       entities: [Edge],
       synchronize: true,
     }),
+    RabbitMQModule,
     EdgesModule,
   ],
   controllers: [AppController],
