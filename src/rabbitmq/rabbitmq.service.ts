@@ -1,10 +1,19 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import * as amqp from 'amqp-connection-manager';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Edge } from '../edge.entity';
 
 @Injectable()
 export class RabbitMQService implements OnModuleInit {
+  private readonly logger = new Logger(RabbitMQService.name);
   private connection: amqp.AmqpConnectionManager;
   private channelWrapper: amqp.ChannelWrapper;
+
+  constructor(
+    @InjectRepository(Edge)
+    private edgesRepository: Repository<Edge>,
+  ) {}
 
   async onModuleInit() {
     this.connection = amqp.connect([process.env.RABBITMQ_URL]);
@@ -12,6 +21,28 @@ export class RabbitMQService implements OnModuleInit {
       json: true,
       setup: (channel) => channel.assertQueue('edges_queue', { durable: true }),
     });
+
+    // Setup consumer
+    await this.consume(async (msg) => {
+      await this.handleEdgeMessage(msg);
+    });
+  }
+
+  private async handleEdgeMessage(msg: any) {
+    this.logger.log(`Received edge message: ${JSON.stringify(msg)}`);
+    
+    try {
+      const edge = await this.edgesRepository.findOne({ where: { id: msg.id } });
+      if (edge) {
+        edge.node1_alias = `${edge.node1_alias}-updated`;
+        edge.node2_alias = `${edge.node2_alias}-updated`;
+        await this.edgesRepository.save(edge);
+        this.logger.log(`Updated edge ${edge.id} with new aliases`);
+      }
+    } catch (error) {
+      this.logger.error(`Error processing edge message: ${error.message}`);
+      throw error;
+    }
   }
 
   async publish(message: any) {
