@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Logger } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { PostgresModule } from './postgres/postgres.module';
@@ -20,6 +20,6 @@ import { Edge } from './edge.entity';
     EdgesModule,
   ],
   controllers: [AppController],
-  providers: [],
+  providers: [Logger], // Provide Logger at app level
 })
 export class AppModule {}
