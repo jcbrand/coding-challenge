@@ -17,7 +17,8 @@ export class RabbitMQService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    if (!process.env.RABBITMQ_URL) throw new Error(`RABBITMQ_URL env var is not set`);
+    if (!process.env.RABBITMQ_URL)
+      throw new Error(`RABBITMQ_URL env var is not set`);
 
     this.connection = amqp.connect([process.env.RABBITMQ_URL]);
     this.channelWrapper = this.connection.createChannel({
