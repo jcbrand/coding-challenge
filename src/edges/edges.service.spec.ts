@@ -68,5 +68,63 @@ describe('EdgesService', () => {
       expect(result).toBe(edge);
       expect(rabbitMQService.publish).toHaveBeenCalled();
     });
+
+    it('should generate capacity between 10000 and 1000000', async () => {
+      const mockEdge = {
+        id: 'test-id',
+        node1_alias: 'node1',
+        node2_alias: 'node2',
+        capacity: 50000,
+        created_at: new Date(),
+      };
+      
+      jest.spyOn(edgesRepository, 'create').mockImplementation((data) => ({
+        ...mockEdge,
+        ...data
+      }));
+      jest.spyOn(edgesRepository, 'save').mockResolvedValue(mockEdge);
+      jest.spyOn(rabbitMQService, 'publish').mockResolvedValue(undefined);
+
+      const edge = await service.create('node1', 'node2');
+      
+      expect(edge.capacity).toBeGreaterThanOrEqual(10000);
+      expect(edge.capacity).toBeLessThanOrEqual(1000000);
+    });
+
+    it('should generate different capacities for different edges', async () => {
+      const mockEdge1 = {
+        id: 'test-id-1',
+        node1_alias: 'node1',
+        node2_alias: 'node2',
+        capacity: 50000,
+        created_at: new Date(),
+      };
+      const mockEdge2 = {
+        id: 'test-id-2',
+        node1_alias: 'node3',
+        node2_alias: 'node4',
+        capacity: 75000,
+        created_at: new Date(),
+      };
+
+      jest.spyOn(edgesRepository, 'create')
+        .mockImplementationOnce((data) => ({
+          ...mockEdge1,
+          ...data
+        }))
+        .mockImplementationOnce((data) => ({
+          ...mockEdge2,
+          ...data
+        }));
+      jest.spyOn(edgesRepository, 'save')
+        .mockResolvedValueOnce(mockEdge1)
+        .mockResolvedValueOnce(mockEdge2);
+      jest.spyOn(rabbitMQService, 'publish').mockResolvedValue(undefined);
+
+      const edge1 = await service.create('node1', 'node2');
+      const edge2 = await service.create('node3', 'node4');
+      
+      expect(edge1.capacity).not.toBe(edge2.capacity);
+    });
   });
 });

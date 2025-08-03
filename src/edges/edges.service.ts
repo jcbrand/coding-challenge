@@ -24,7 +24,7 @@ export class EdgesService {
     const edge = this.edgesRepository.create({
       node1_alias,
       node2_alias,
-      capacity: 0,
+      capacity: Math.floor(Math.random() * (1000000 - 10000 + 1)) + 10000,
     });
     const savedEdge = await this.edgesRepository.save(edge);
 
