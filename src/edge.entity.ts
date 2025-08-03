@@ -25,7 +25,10 @@ export class Edge {
   @Column({ type: 'int', default: 0 })
   capacity: number;
 
-  @Field(() => String)
+  @Field(() => String, {
+    description: 'String representation of the capacity value',
+    name: 'capacity' // Expose it as 'capacity' in GraphQL
+  })
   get capacityString(): string {
     return this.capacity.toString();
   }
