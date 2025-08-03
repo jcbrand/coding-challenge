@@ -19,7 +19,8 @@ export class RabbitMQService implements OnModuleInit {
     this.connection = amqp.connect([process.env.RABBITMQ_URL]);
     this.channelWrapper = this.connection.createChannel({
       json: true,
-      setup: (channel) => channel.assertQueue('edges_queue', { durable: true }),
+      setup: (channel) =>
+        channel.assertQueue('edges_queue', { durable: true }),
     });
 
     // Setup consumer
@@ -30,9 +31,11 @@ export class RabbitMQService implements OnModuleInit {
 
   private async handleEdgeMessage(msg: any) {
     this.logger.log(`Received edge message: ${JSON.stringify(msg)}`);
-    
+
     try {
-      const edge = await this.edgesRepository.findOne({ where: { id: msg.id } });
+      const edge = await this.edgesRepository.findOne({
+        where: { id: msg.id },
+      });
       if (edge) {
         edge.node1_alias = `${edge.node1_alias}-updated`;
         edge.node2_alias = `${edge.node2_alias}-updated`;
@@ -50,7 +53,8 @@ export class RabbitMQService implements OnModuleInit {
       await this.channelWrapper.sendToQueue(
         'edges_queue',
         Buffer.from(JSON.stringify(message)),
-        { persistent: true },
+        // @ts-ignore
+        { deliveryMode: 2 },
       );
     } catch (error) {
       console.error('Error publishing message:', error);

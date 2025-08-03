@@ -12,7 +12,7 @@ export class EdgesResolver {
   }
 
   @Query(() => Edge)
-  async getEdge(@Args('id') id: string): Promise<Edge> {
+  async getEdge(@Args('id') id: string): Promise<Edge|null> {
     return this.edgesService.findOne(id);
   }
 
