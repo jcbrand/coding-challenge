@@ -1,4 +1,5 @@
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
+import * as amqplib from 'amqplib';
 import * as amqp from 'amqp-connection-manager';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -16,10 +17,12 @@ export class RabbitMQService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
+    if (!process.env.RABBITMQ_URL) throw new Error(`RABBITMQ_URL env var is not set`);
+
     this.connection = amqp.connect([process.env.RABBITMQ_URL]);
     this.channelWrapper = this.connection.createChannel({
       json: true,
-      setup: (channel) =>
+      setup: (channel: amqplib.ConfirmChannel) =>
         channel.assertQueue('edges_queue', { durable: true }),
     });
 
@@ -53,7 +56,6 @@ export class RabbitMQService implements OnModuleInit {
       await this.channelWrapper.sendToQueue(
         'edges_queue',
         Buffer.from(JSON.stringify(message)),
-        // @ts-ignore
         { deliveryMode: 2 },
       );
     } catch (error) {
@@ -62,7 +64,7 @@ export class RabbitMQService implements OnModuleInit {
   }
 
   async consume(callback: (msg: any) => Promise<void>) {
-    this.channelWrapper.addSetup(async (channel) => {
+    this.channelWrapper.addSetup(async (channel: amqplib.ConfirmChannel) => {
       await channel.consume('edges_queue', async (msg) => {
         if (msg) {
           try {
