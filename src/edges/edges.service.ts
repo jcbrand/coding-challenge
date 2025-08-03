@@ -16,7 +16,7 @@ export class EdgesService {
     return this.edgesRepository.find();
   }
 
-  async findOne(id: string): Promise<Edge|null> {
+  async findOne(id: string): Promise<Edge | null> {
     return this.edgesRepository.findOne({ where: { id } });
   }
 

@@ -11,8 +11,8 @@ export class EdgesResolver {
     return this.edgesService.findAll();
   }
 
-  @Query(() => Edge)
-  async getEdge(@Args('id') id: string): Promise<Edge|null> {
+  @Query(() => Edge, { nullable: true })
+  async getEdge(@Args('id') id: string): Promise<Edge | null> {
     return this.edgesService.findOne(id);
   }
 

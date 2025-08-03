@@ -17,7 +17,8 @@ docker compose up -d --build
 ### GraphQL API Testing
 
 Access the GraphQL Playground at:  
-http://localhost:3000/graphql
+http://localhost:3000/graphql  
+(make sure to include the trailing slash if needed)
 
 #### Create an Edge
 ```graphql
