@@ -7,13 +7,13 @@ import { Edge } from '../edge.entity';
 
 @Injectable()
 export class RabbitMQService implements OnModuleInit {
-  private readonly logger = new Logger(RabbitMQService.name);
   private connection: amqp.AmqpConnectionManager;
   private channelWrapper: amqp.ChannelWrapper;
 
   constructor(
     @InjectRepository(Edge)
     private edgesRepository: Repository<Edge>,
+    private readonly logger: Logger,
   ) {}
 
   async onModuleInit() {
@@ -34,15 +34,17 @@ export class RabbitMQService implements OnModuleInit {
   }
 
   private async handleEdgeMessage(msg: any) {
-    this.logger.log(`Received edge message: ${JSON.stringify(msg)}`);
+    this.logger.log(
+      `New channel between ${msg.node1_alias} and ${msg.node2_alias} with a capacity of ${msg.capacity} has been created.`
+    );
 
     try {
       const edge = await this.edgesRepository.findOne({
         where: { id: msg.id },
       });
       if (edge) {
-        edge.node1_alias = `${edge.node1_alias}-updated`;
-        edge.node2_alias = `${edge.node2_alias}-updated`;
+        edge.node1_alias = `${msg.node1_alias}-updated`;
+        edge.node2_alias = `${msg.node2_alias}-updated`;
         await this.edgesRepository.save(edge);
         this.logger.log(`Updated edge ${edge.id} with new aliases`);
       }
