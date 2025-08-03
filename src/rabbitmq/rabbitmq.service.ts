@@ -28,12 +28,12 @@ export class RabbitMQService implements OnModuleInit {
     });
 
     // Setup consumer
-    await this.consume(async (msg) => {
+    await this.consume(async (msg: Edge) => {
       await this.handleEdgeMessage(msg);
     });
   }
 
-  private async handleEdgeMessage(msg: any) {
+  private async handleEdgeMessage(msg: Edge) {
     this.logger.log(
       `New channel between ${msg.node1_alias} and ${msg.node2_alias} with a capacity of ${msg.capacity} has been created.`
     );
@@ -54,7 +54,7 @@ export class RabbitMQService implements OnModuleInit {
     }
   }
 
-  async publish(message: any) {
+  async publish(message: Edge) {
     try {
       await this.channelWrapper.sendToQueue(
         'edges_queue',
@@ -66,12 +66,13 @@ export class RabbitMQService implements OnModuleInit {
     }
   }
 
-  async consume(callback: (msg: any) => Promise<void>) {
+  async consume(callback: (msg: Edge) => Promise<void>) {
     this.channelWrapper.addSetup(async (channel: amqplib.ConfirmChannel) => {
       await channel.consume('edges_queue', async (msg) => {
         if (msg) {
           try {
-            await callback(JSON.parse(msg.content.toString()));
+            const { data } = JSON.parse(msg.content.toString());
+            await callback(JSON.parse(Buffer.from(data).toString()));
             channel.ack(msg);
           } catch (error) {
             console.error('Error processing message:', error);
