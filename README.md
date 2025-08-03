@@ -28,6 +28,7 @@ mutation {
     node1_alias
     node2_alias
     capacity
+    edge_peers
     created_at
     updated_at
   }
@@ -42,6 +43,7 @@ query {
     node1_alias
     node2_alias
     capacity
+    edge_peers
   }
 }
 ```
@@ -54,6 +56,7 @@ query {
     node1_alias
     node2_alias
     capacity
+    edge_peers
   }
 }
 ```
