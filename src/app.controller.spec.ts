@@ -1,22 +1,30 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { Response } from 'express';
 
 describe('AppController', () => {
   let appController: AppController;
+  const mockResponse = {
+    send: jest.fn().mockReturnThis(),
+  } as unknown as Response;
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [AppController],
-      providers: [AppService],
     }).compile();
 
     appController = app.get<AppController>(AppController);
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+    it('should render the landing page HTML', () => {
+      appController.getHome(mockResponse);
+      expect(mockResponse.send).toHaveBeenCalledWith(
+        expect.stringContaining('<!DOCTYPE html>'),
+      );
+      expect(mockResponse.send).toHaveBeenCalledWith(
+        expect.stringContaining('Network Graph API Service'),
+      );
     });
   });
 });
