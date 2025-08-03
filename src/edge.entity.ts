@@ -14,23 +14,32 @@ export class Edge {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Field()
+  @Field(() => String)
   @CreateDateColumn()
   created_at: Date;
 
-  @Field()
+  @Field(() => String)
   @UpdateDateColumn()
   updated_at: Date;
 
-  @Field()
   @Column({ type: 'int', default: 0 })
   capacity: number;
 
-  @Field()
+  @Field(() => String)
+  get capacityString(): string {
+    return this.capacity.toString();
+  }
+
+  @Field(() => String)
   @Column()
   node1_alias: string;
 
-  @Field()
+  @Field(() => String)
   @Column()
   node2_alias: string;
+
+  @Field(() => String)
+  get edge_peers(): string {
+    return `[${this.node1_alias}]-[${this.node2_alias}]`;
+  }
 }

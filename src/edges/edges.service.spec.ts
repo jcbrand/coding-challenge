@@ -54,19 +54,37 @@ describe('EdgesService', () => {
   });
 
   describe('create', () => {
-    it('should create and return an edge', async () => {
-      const edge = new Edge();
-      edge.node1_alias = 'node1';
-      edge.node2_alias = 'node2';
-      edge.capacity = 10000;
+    it('should create edge with numeric capacity and publish message', async () => {
+      const mockEdge = new Edge();
+      mockEdge.id = 'test-id';
+      mockEdge.node1_alias = 'nodeA';
+      mockEdge.node2_alias = 'nodeB';
+      mockEdge.capacity = 75000;
 
-      jest.spyOn(edgesRepository, 'create').mockReturnValue(edge);
-      jest.spyOn(edgesRepository, 'save').mockResolvedValue(edge);
-      jest.spyOn(rabbitMQService, 'publish').mockResolvedValue(undefined);
+      jest.spyOn(edgesRepository, 'create').mockImplementation((data) => ({
+        ...mockEdge,
+        ...data
+      }));
+      jest.spyOn(edgesRepository, 'save').mockResolvedValue(mockEdge);
 
-      const result = await service.create('node1', 'node2');
-      expect(result).toBe(edge);
-      expect(rabbitMQService.publish).toHaveBeenCalled();
+      const result = await service.create('nodeA', 'nodeB');
+
+      // Verify numeric handling in service layer
+      expect(edgesRepository.create).toHaveBeenCalledWith({
+        node1_alias: 'nodeA',
+        node2_alias: 'nodeB',
+        capacity: expect.any(Number) // Should be numeric
+      });
+      
+      // Verify RabbitMQ message contains numeric capacity
+      expect(rabbitMQService.publish).toHaveBeenCalledWith({
+        id: 'test-id',
+        node1_alias: 'nodeA',
+        node2_alias: 'nodeB',
+        capacity: 75000 // numeric value
+      });
+      
+      expect(result).toEqual(mockEdge);
     });
 
     it('should generate capacity between 10000 and 1000000', async () => {

@@ -43,10 +43,29 @@ describe('EdgesResolver', () => {
   });
 
   describe('createEdge', () => {
-    it('should create and return an edge', async () => {
-      const result = new Edge();
-      jest.spyOn(service, 'create').mockResolvedValue(result);
-      expect(await resolver.createEdge('node1', 'node2')).toBe(result);
+    it('should return edge with properly formatted string fields', async () => {
+      const mockEdge = new Edge();
+      mockEdge.id = 'test-id';
+      mockEdge.node1_alias = 'nodeA';
+      mockEdge.node2_alias = 'nodeB';
+      mockEdge.capacity = 75000;
+      mockEdge.created_at = new Date('2023-01-01');
+      mockEdge.updated_at = new Date('2023-01-02');
+
+      jest.spyOn(service, 'create').mockResolvedValue(mockEdge);
+
+      const result = await resolver.createEdge('nodeA', 'nodeB');
+
+      // Verify string fields in GraphQL response
+      expect(result).toMatchObject({
+        id: 'test-id',
+        node1_alias: 'nodeA',
+        node2_alias: 'nodeB',
+        capacityString: '75000',
+        edge_peers: '[nodeA]-[nodeB]'
+      });
+      expect(result.created_at.toISOString()).toBe('2023-01-01T00:00:00.000Z');
+      expect(result.updated_at.toISOString()).toBe('2023-01-02T00:00:00.000Z');
     });
   });
 });

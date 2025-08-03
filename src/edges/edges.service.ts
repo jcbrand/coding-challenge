@@ -28,14 +28,15 @@ export class EdgesService {
     });
     const savedEdge = await this.edgesRepository.save(edge);
 
-    // Publish to RabbitMQ
+    // Publish to RabbitMQ - using numeric capacity as stored in DB
     await this.rabbitMQService.publish({
       id: savedEdge.id,
       node1_alias: savedEdge.node1_alias,
       node2_alias: savedEdge.node2_alias,
-      capacity: savedEdge.capacity,
+      capacity: savedEdge.capacity, // numeric value
     });
 
+    // Return the edge which will automatically use the string getters
     return savedEdge;
   }
 }
