@@ -2,7 +2,7 @@
 
 ## Development Setup
 
-1. Install dependencies:
+1. Install NPM dependencies (if you want to run tests locally):
 ```bash
 npm install
 ```
@@ -14,11 +14,11 @@ docker compose up -d --build
 
 ## Testing the Application
 
+You can visit the landing page at http://localhost:3000/
+
 ### GraphQL API Testing
 
-Access the GraphQL Playground at:  
-http://localhost:3000/graphql  
-(make sure to include the trailing slash if needed)
+Access the GraphQL Playground at:  http://localhost:3000/graphql  
 
 #### Create an Edge
 ```graphql
@@ -60,18 +60,47 @@ query {
 
 ### Monitoring Services
 
-1. **View API Logs**:
+1. **API Service**:
 ```bash
+# View logs
 docker compose logs -f api
+
+# Access shell
+docker compose exec api sh
 ```
 
-2. **RabbitMQ Dashboard**:  
+2. **RabbitMQ**:
+```bash
+# View logs
+docker compose logs -f rabbitmq
+
+# Management Dashboard:  
 http://localhost:15672  
 Credentials: guest/guest
 
-3. **PostgreSQL Access**:
+# List queues
+docker compose exec rabbitmq rabbitmqadmin list queues
+```
+
+3. **PostgreSQL**:
 ```bash
+# View logs
+docker compose logs -f db
+
+# Access database shell
 docker compose exec db psql -U postgres nest
+
+# Run queries
+docker compose exec db psql -U postgres nest -c "SELECT * FROM edge;"
+```
+
+4. **Service Status**:
+```bash
+# Check running containers
+docker compose ps
+
+# View resource usage
+docker stats
 ```
 
 ## Architecture Flow
@@ -84,26 +113,43 @@ docker compose exec db psql -U postgres nest
 
 ## Running the Server
 
+### Development Mode
 ```bash
-# development mode
 npm run start:dev
+```
+- Watches for file changes and auto-restarts
+- Access GraphQL Playground at http://localhost:3000/graphql
 
-# production mode
+### Production Mode
+```bash
+npm run build
 npm run start:prod
 ```
+- Runs compiled JavaScript from dist/ directory
+- Optimized for performance
 
 ## Running Tests
 
+### Unit Tests
 ```bash
-# unit tests
 npm run test
+```
+- Tests individual components and services
+- Runs in watch mode by default
 
-# e2e tests
-npm run test:e2e
-
-# test coverage
+### Test Coverage
+```bash
 npm run test:cov
 ```
+- Generates coverage report in coverage/ directory
+- Helps identify untested code paths
+
+### Debugging Tests
+```bash
+npm run test:debug
+```
+- Runs tests with debugger attached
+- Useful for troubleshooting failing tests
 
 ## Environment Variables
 
