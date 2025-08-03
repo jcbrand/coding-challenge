@@ -2,17 +2,12 @@
 
 ## Development Setup
 
-1. Install NPM dependencies (if you want to run tests locally):
-```bash
-npm install
-```
-
-2. Start services:
+Start services:
 ```bash
 docker compose up -d --build
 ```
 
-## Testing the Application
+## Manually Testing the Application
 
 You can visit the landing page at http://localhost:3000/
 
@@ -106,39 +101,18 @@ docker compose ps
 docker stats
 ```
 
-## Architecture Flow
+## Running Automated Tests
 
-1. GraphQL mutation creates edge → saves to Postgres
-2. Service publishes message to RabbitMQ
-3. Consumer receives message → updates aliases (appends "-updated")
-4. Updated edge saved back to Postgres
-5. Query shows final updated state
-
-## Running the Server
-
-### Development Mode
+First install the NPM dependencies
 ```bash
-npm run start:dev
+npm install
 ```
-- Watches for file changes and auto-restarts
-- Access GraphQL Playground at http://localhost:3000/graphql
-
-### Production Mode
-```bash
-npm run build
-npm run start:prod
-```
-- Runs compiled JavaScript from dist/ directory
-- Optimized for performance
-
-## Running Tests
 
 ### Unit Tests
 ```bash
 npm run test
 ```
 - Tests individual components and services
-- Runs in watch mode by default
 
 ### Test Coverage
 ```bash
@@ -146,13 +120,6 @@ npm run test:cov
 ```
 - Generates coverage report in coverage/ directory
 - Helps identify untested code paths
-
-### Debugging Tests
-```bash
-npm run test:debug
-```
-- Runs tests with debugger attached
-- Useful for troubleshooting failing tests
 
 ## Environment Variables
 
